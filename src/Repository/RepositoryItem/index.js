@@ -16,6 +16,17 @@ const STAR_REPOSITORY = gql`
   }
 `;
 
+const REMOVE_STAR = gql`
+  mutation($id: ID!) {
+    removeStar(input: { starrableId: $id }) {
+      starrable {
+        id
+        viewerHasStarred
+      }
+    }
+  }
+`;
+
 const RepositoryItem = ({
   id,
   url,
@@ -29,6 +40,7 @@ const RepositoryItem = ({
   viewerSubscription,
 }) => {
   const [addStar, { data }] = useMutation(STAR_REPOSITORY);
+  const [removeStar, {}] = useMutation(REMOVE_STAR);
   console.log('MUTATION: ', data);
 
   return (
@@ -43,12 +55,22 @@ const RepositoryItem = ({
         </div>
 
         <div>
-          <Button
-            className={'RepositoryItem-title-action'}
-            onClick={() => addStar({ variables: { id }})}
-          >
-            {stargazers.totalCount} Star
-          </Button>
+          {!viewerHasStarred
+            ? <Button
+                className={'RepositoryItem-title-action'}
+                onClick={() => addStar({ variables: { id }})}
+              >
+                {stargazers.totalCount} Star
+              </Button>
+            : <Button
+                className={'RepositoryItem-title-action'}
+                onClick={() => removeStar({ variables: { id }})}
+              >
+              {stargazers.totalCount} Star
+              </Button>
+          }
+
+          {/* Here comes your updateSubscription mutation */}
         </div>
       </div>
 
