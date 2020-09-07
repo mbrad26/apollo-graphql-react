@@ -3,12 +3,36 @@ import { useQuery, gql } from '@apollo/client';
 
 import Error from '../Error';
 import Loading from '../Loading';
+import RepositoryList from '../Repository';
 
 const GET_CURRENT_USER = gql`
 {
   viewer {
-    login
-    name
+    repositories(first: 5, orderBy: { direction: DESC, field: STARGAZERS }) {
+      edges {
+        node {
+          id
+          name
+          url
+          descriptionHTML
+          primaryLanguage {
+            name
+          }
+          owner {
+            login
+            url
+          }
+          stargazers {
+            totalCount
+          }
+          viewerHasStarred
+          watchers {
+            totalCount
+          }
+          viewerSubscription
+        }
+      }
+    }
   }
 }
 `;
@@ -19,10 +43,8 @@ const Profile = () => {
   if(loading) return <Loading />
   if(error) return <Error error={error} />
 
-  const { name, login } = data.viewer;
-
   return (
-    <div>{name} {login}</div>
+    <RepositoryList repositories={data.viewer.repositories} />
   );
 };
 

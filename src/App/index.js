@@ -1,5 +1,6 @@
 import React from 'react';
 
+import './style.css';
 import Profile from '../Profile';
 
 const App = () => {
