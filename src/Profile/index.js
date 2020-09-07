@@ -1,6 +1,9 @@
 import React from 'react';
 import { useQuery, gql } from '@apollo/client';
 
+import Error from '../Error';
+import Loading from '../Loading';
+
 const GET_CURRENT_USER = gql`
 {
   viewer {
@@ -13,17 +16,13 @@ const GET_CURRENT_USER = gql`
 const Profile = () => {
   const { loading, error, data } = useQuery(GET_CURRENT_USER);
 
-  if(loading) {
-    return <div>Loading ...</div>
-  };
+  if(loading) return <Loading />
+  if(error) return <Error error={error} />
 
-  if(error) {
-      console.log(error);
-      return <div>Error!</div>
-  };
+  const { name, login } = data.viewer;
 
   return (
-    <div>{data.viewer.name}</div>
+    <div>{name} {login}</div>
   );
 };
 
