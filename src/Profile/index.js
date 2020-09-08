@@ -3,7 +3,7 @@ import { useQuery, gql } from '@apollo/client';
 
 import ErrorMessage from '../Error';
 import Loading from '../Loading';
-import RepositoryList from '../Repository';
+import RepositoryList, { REPOSITORY_FRAGMENT } from '../Repository';
 
 const GET_CURRENT_USER = gql`
 {
@@ -11,30 +11,13 @@ const GET_CURRENT_USER = gql`
     repositories(first: 5, orderBy: { direction: DESC, field: STARGAZERS }) {
       edges {
         node {
-          id
-          name
-          url
-          descriptionHTML
-          primaryLanguage {
-            name
-          }
-          owner {
-            login
-            url
-          }
-          stargazers {
-            totalCount
-          }
-          viewerHasStarred
-          watchers {
-            totalCount
-          }
-          viewerSubscription
+          ...repository
         }
       }
     }
   }
 }
+${REPOSITORY_FRAGMENT}
 `;
 
 const Profile = () => {
