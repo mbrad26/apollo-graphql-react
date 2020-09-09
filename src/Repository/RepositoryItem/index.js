@@ -125,8 +125,8 @@ const RepositoryItem = ({
   viewerHasStarred,
   viewerSubscription,
 }) => {
-  const [addStar, { data }] = useMutation(STAR_REPOSITORY, { update: updateAddStar });
-  const [removeStar, {}] = useMutation(REMOVE_STAR, { update: updateRemoveStar });
+  const [addStar] = useMutation(STAR_REPOSITORY, { update: updateAddStar });
+  const [removeStar] = useMutation(REMOVE_STAR, { update: updateRemoveStar });
   const [updateSubscription] = useMutation(UPDATE_SUBSCRIPTION, { update: updateSubscriptionStatus });
 
   return (
