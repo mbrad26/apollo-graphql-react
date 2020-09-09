@@ -29,7 +29,7 @@ const REMOVE_STAR = gql`
 `;
 
 const UPDATE_SUBSCRIPTION = gql`
-  mutation($id: ID!, $state: String) {
+  mutation($id: ID!, $state: String!) {
     updateSubscription(input: { subscribableId: $id, state: $state}) {
       subscribable {
         id
@@ -39,24 +39,33 @@ const UPDATE_SUBSCRIPTION = gql`
   }
 `;
 
-const updateSubscriptionStatus = (client, { data: { updateSubscription: { subscribable: { id }}}}) => {
+const VIEWER_SUBSCRIPTIONS = {
+  SUBSCRIBED: 'SUBSCRIBED',
+  UNSUBSCRIBED: 'UNSUBSCRIBED',
+};
+
+const isWatch = viewerSubscription =>
+  viewerSubscription === VIEWER_SUBSCRIPTIONS.SUBSCRIBED;
+
+const updateSubscriptionStatus = (client, { data: { updateSubscription: { subscribable: { id, viewerSubscription }}}}) => {
   const repository = client.readFragment({
     id: `Repository:${id}`,
     fragment: REPOSITORY_FRAGMENT,
   });
 
-  const viewerSubscription = repository.viewerSubscription === 'SUBSCRIBED'
-    ? 'UNSUBSCRIBED'
-    : 'SUBSCRIBED';
+  let { totalCount } = repository.watchers;
+  totalCount = viewerSubscription === VIEWER_SUBSCRIPTIONS.SUBSCRIBED
+    ? totalCount + 1
+    : totalCount - 1;
 
   client.writeFragment({
     id: `Repository:${id}`,
     fragment: REPOSITORY_FRAGMENT,
     data: {
       ...repository,
-      viewerSubscription: {
-        ...repository.viewerSubscription,
-        viewerSubscription,
+      watchers: {
+        ...repository.watchers,
+        totalCount,
       }
     }
   });
@@ -146,21 +155,20 @@ const RepositoryItem = ({
                 {stargazers.totalCount} Star
               </Button>
           }
-          {viewerSubscription === 'UNSUBSCRIBED'
-            ? <Button
-                className={'RepositoryItem-title-action'}
-                onClick={() => updateSubscription({ variables: { id, state: 'SUBSCRIBED' }})}
-              >
-                Watch
-              </Button>
-            : <Button
-                className={'RepositoryItem-title-action'}
-                onClick={() => updateSubscription({ variables: { id, state: 'UNSUBSCRIBED' }})}
-              >
-                Unwatch
-              </Button>
-
-          }
+            <Button
+              className={'RepositoryItem-title-action'}
+              onClick={() => updateSubscription(
+                { variables: {
+                  id,
+                  state: isWatch(viewerSubscription)
+                          ? VIEWER_SUBSCRIPTIONS.UNSUBSCRIBED
+                          : VIEWER_SUBSCRIPTIONS.SUBSCRIBED
+                }}
+              )}
+            >
+              {watchers.totalCount}{' '}
+              {isWatch(viewerSubscription) ? 'Unwatch' : 'Watch'}
+            </Button>
         </div>
       </div>
 
