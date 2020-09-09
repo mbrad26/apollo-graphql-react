@@ -4,6 +4,7 @@ import { useMutation, gql } from '@apollo/client';
 import '../style.css';
 import Link from '../../Link';
 import Button from '../../Button';
+import { REPOSITORY_FRAGMENT } from '../';
 
 const STAR_REPOSITORY = gql`
   mutation($id: ID!) {
@@ -38,6 +39,27 @@ const UPDATE_SUBSCRIPTION = gql`
   }
 `;
 
+const updateAddStar = (client, { data: { addStar: { starrable: { id } } } }) => {
+  const repository = client.readFragment({
+    id: `Repository:${id}`,
+    fragment: REPOSITORY_FRAGMENT,
+  });
+
+  const totalCount = repository.stargazers.totalCount + 1;
+
+  client.writeFragment({
+    id: `Repository:${id}`,
+    fragment: REPOSITORY_FRAGMENT,
+    data: {
+      ...repository,
+      stargazers: {
+        ...repository.stargazers,
+        totalCount,
+      },
+    },
+  });
+};
+
 const RepositoryItem = ({
   id,
   url,
@@ -50,10 +72,9 @@ const RepositoryItem = ({
   viewerHasStarred,
   viewerSubscription,
 }) => {
-  const [addStar, { data }] = useMutation(STAR_REPOSITORY);
+  const [addStar, { data }] = useMutation(STAR_REPOSITORY, { update: updateAddStar });
   const [removeStar, {}] = useMutation(REMOVE_STAR);
-  const [updateSubscription, {}] = useMutation(UPDATE_SUBSCRIPTION);
-  console.log('MUTATION: ', viewerSubscription);
+  const [updateSubscription] = useMutation(UPDATE_SUBSCRIPTION);
 
   return (
     <div>
