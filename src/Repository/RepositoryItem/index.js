@@ -39,6 +39,29 @@ const UPDATE_SUBSCRIPTION = gql`
   }
 `;
 
+const updateSubscriptionStatus = (client, { data: { updateSubscription: { subscribable: { id }}}}) => {
+  const repository = client.readFragment({
+    id: `Repository:${id}`,
+    fragment: REPOSITORY_FRAGMENT,
+  });
+
+  const viewerSubscription = repository.viewerSubscription === 'SUBSCRIBED'
+    ? 'UNSUBSCRIBED'
+    : 'SUBSCRIBED';
+
+  client.writeFragment({
+    id: `Repository:${id}`,
+    fragment: REPOSITORY_FRAGMENT,
+    data: {
+      ...repository,
+      viewerSubscription: {
+        ...repository.viewerSubscription,
+        viewerSubscription,
+      }
+    }
+  });
+};
+
 const updateAddStar = (client, { data: { addStar: { starrable: { id }}}}) => {
   const repository = client.readFragment({
     id: `Repository:${id}`,
@@ -95,7 +118,7 @@ const RepositoryItem = ({
 }) => {
   const [addStar, { data }] = useMutation(STAR_REPOSITORY, { update: updateAddStar });
   const [removeStar, {}] = useMutation(REMOVE_STAR, { update: updateRemoveStar });
-  const [updateSubscription] = useMutation(UPDATE_SUBSCRIPTION);
+  const [updateSubscription] = useMutation(UPDATE_SUBSCRIPTION, { update: updateSubscriptionStatus });
 
   return (
     <div>
