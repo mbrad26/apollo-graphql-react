@@ -33,7 +33,7 @@ exports[`App renders snapshot 1`] = `
       class="App-content_large-header"
     >
       <div>
-        Organization
+        Loading ...
       </div>
     </div>
   </div>
