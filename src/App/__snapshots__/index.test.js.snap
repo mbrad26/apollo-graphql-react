@@ -25,6 +25,22 @@ exports[`App renders snapshot 1`] = `
         Organization
       </a>
     </div>
+    <div
+      class="Navigation-search"
+    >
+      <form>
+        <input
+          class="Input Input_white"
+        />
+         
+        <button
+          class="undefined Button Button_white"
+          type="submit"
+        >
+          Search
+        </button>
+      </form>
+    </div>
   </header>
   <div
     class="App-main"
